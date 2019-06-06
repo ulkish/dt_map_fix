@@ -37,18 +37,13 @@ function dt_map_fixer(int $latest_clone_site_id, int $cloned_site_id ) {
 
 	$current_blog_id = 0;
 	foreach ( $og_blog_and_post_ids as $post ) {
-
-		if ( $post['blog_id'] == $current_blog_id ) {
-			$dt_connection = get_post_meta( $post['post_id'], 'dt_connection_map' );
-			$dt_connection[0]['internal'][$latest_clone_site_id] = $dt_connection[0]['internal'][$cloned_site_id];
-			update_post_meta( $post['post_id'], 'dt_connection_map', $dt_connection[0] );
-		}else {
+		if ( $post['blog_id'] !== $current_blog_id ) {
 			switch_to_blog( $post['blog_id'] );
 			$current_blog_id = $post['blog_id'];
-			$dt_connection = get_post_meta( $post['post_id'], 'dt_connection_map' );
-			$dt_connection[0]['internal'][$latest_clone_site_id] = $dt_connection[0]['internal'][$cloned_site_id];
-			update_post_meta( $post['post_id'], 'dt_connection_map', $dt_connection[0] );
 		}
+		$dt_connection = get_post_meta( $post['post_id'], 'dt_connection_map' );
+		$dt_connection[0]['internal'][$latest_clone_site_id] = $dt_connection[0]['internal'][$cloned_site_id];
+		update_post_meta( $post['post_id'], 'dt_connection_map', $dt_connection[0] );
 	}
 	restore_current_blog();
 }
@@ -73,9 +68,9 @@ function dtfm_admin_page() {
 		<form action="<?php echo $plugin_url ?>" method="POST">
 			<table class="form-table">
 			<tr>
-				<th scope="row"><label for="latest">Select latest cloned site:</label></th>
+				<th scope="row"><label for="latest">Latest cloned site:</label></th>
 				<td>
-					<select name="latest">
+					<select name="latest" id="latest">
 					<?php foreach ($network_sites as $site) {
 							echo '<option value="'
 							. $site->blog_id
@@ -90,9 +85,9 @@ function dtfm_admin_page() {
 				</td>
 			</tr>
 			<tr>
-				<th scope="row"><label for="cloned">Select cloned site:</label></th>
+				<th scope="row"><label for="cloned">Cloned site:</label></th>
 				<td>
-					<select name="cloned">
+					<select name="cloned" id="cloned">
 					<?php foreach ($network_sites as $site) {
 							echo '<option value="'
 							. $site->blog_id
